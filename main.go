@@ -1,3 +1,25 @@
+// The MIT License (MIT)
+//
+// Copyright (c) 2016 aerth
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 package main
 
 import (
@@ -15,7 +37,7 @@ func main() {
     }
 
 
-    fmt.Println("Mail to who?")
+    fmt.Println("Welcome to Sendgrid.\n\nMail to who?")
 		maildestination := getTypin()
     if maildestination == "" {
       maildestination = getTypin()
@@ -27,21 +49,17 @@ func main() {
      os.Exit(1)
     }
 
-    fmt.Println("Destination Name? Press ENTER for "+maildestination)
+    fmt.Println("\nDestination Name? Press ENTER for "+maildestination)
 		maildestinationname := getTypin()
     if maildestinationname == "" {
       maildestinationname = maildestination
     }
 
-    fmt.Println("SUBJECT: Press ENTER three times for no subject.")
+    fmt.Println("\nSUBJECT: Press ENTER for no subject.")
 		mailsubject := getTypin()
     if mailsubject == "" {
-      mailsubject = getTypin()
+      mailsubject = "<no subject>"
     }
-    if mailsubject == "" {
-      mailsubject = getTypin()
-    }
-
     fmt.Println("Message Text: Press ENTER when finished.")
 		mailbody := getTypin()
     if mailbody == "" {
@@ -53,7 +71,10 @@ func main() {
     if mailbody == "" {
      os.Exit(1)
     }
-
+var mailfrom string
+if os.Getenv("SENDGRID_FROM") != "" {
+mailfrom = os.Getenv("SENDGRID_FROM")
+}else{
     fmt.Println("From Address")
 		mailfrom := getTypin()
     if mailfrom == "" {
@@ -62,6 +83,8 @@ func main() {
     if mailfrom == "" {
       mailfrom = getTypin()
     }
+
+}
     if mailfrom == "" {
      os.Exit(1)
     }
@@ -73,15 +96,60 @@ func main() {
     message.SetSubject(mailsubject)
     message.SetText(mailbody)
     message.SetFrom(mailfrom)
-    fmt.Println(message)
-    fmt.Println("Type Y<ENTER> to send")
+    fmt.Println(mailfrom)
+    fmt.Println(mailsubject)
+    fmt.Println(maildestination + "(" + maildestinationname + ")")
+    fmt.Println(mailbody)
+
+    fmt.Println("\n\nYes [y/Y] to send\n\n")
     if !askForConfirmation() {
+      fmt.Println("Mail not sent.")
     os.Exit(1)
-  }
+    }
     if r := sg.Send(message); r == nil {
                 fmt.Println("Email sent!")
         } else {
-                fmt.Println(r)
+            fmt.Println(r)
+            fmt.Println("Try again? [Y/y/Yes]")
+          if !askForConfirmation() {
+            fmt.Println("Mail not sent.")
+          os.Exit(1)
+          }
+          if r := sg.Send(message); r == nil {
+                      fmt.Println("Email sent!")
+              } else {
+                  fmt.Println(r)
+                  fmt.Println("Try again? [Y/y/Yes]")
+                if !askForConfirmation() {
+                  fmt.Println("Mail not sent.")
+                os.Exit(1)
+                }
+                if r := sg.Send(message); r == nil {
+                            fmt.Println("Email sent!")
+                    } else {
+                        fmt.Println(r)
+                        fmt.Println("Try again? [Y/y/Yes]")
+                      if !askForConfirmation() {
+                        fmt.Println("Mail not sent.")
+                      os.Exit(1)
+                      }
+                      if r := sg.Send(message); r == nil {
+                                  fmt.Println("Email sent!")
+                          } else {
+                              fmt.Println(r)
+                              fmt.Println("Try again? [Y/y/Yes]")
+                            if !askForConfirmation() {
+                              fmt.Println("Mail not sent.")
+                            os.Exit(1)
+                            }
+
+                            os.Exit(1)
+                          }
+
+                    }
+
+              }
+
         }
 }
 
