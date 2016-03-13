@@ -74,6 +74,7 @@ func main() {
     message.SetText(mailbody)
     message.SetFrom(mailfrom)
     fmt.Println(message)
+    fmt.Println("Type Y<ENTER> to send")
     if !askForConfirmation() {
     os.Exit(1)
   }
