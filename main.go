@@ -68,6 +68,7 @@ func main() {
 	}
 	sendgridKey := os.Getenv("SENDGRID_API_KEY")
 
+	var mailfrom string
 	if sendgridKey == "" {
 		if seconf.Detect("sendgrid") {
 			configdecoded, err := seconf.Read("sendgrid")
@@ -139,20 +140,21 @@ func main() {
 	if mailbody == "" {
 		os.Exit(1)
 	}
-
-	var mailfrom string
-	if os.Getenv("SENDGRID_FROM") != "" {
-		mailfrom = os.Getenv("SENDGRID_FROM")
-	} else {
-		fmt.Println("From Address")
-		mailfrom := getTypin()
-		if mailfrom == "" {
-			mailfrom = getTypin()
+	if mailfrom == "" {
+		if os.Getenv("SENDGRID_FROM") != "" {
+			mailfrom = os.Getenv("SENDGRID_FROM")
 		}
 		if mailfrom == "" {
-			mailfrom = getTypin()
-		}
+			fmt.Println("From Address")
+			mailfrom := getTypin()
+			if mailfrom == "" {
+				mailfrom = getTypin()
+			}
+			if mailfrom == "" {
+				mailfrom = getTypin()
+			}
 
+		}
 	}
 	if mailfrom == "" {
 		fmt.Println("Exiting.")
